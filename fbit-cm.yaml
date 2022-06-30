@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: logging
+  labels:
+    k8s-app: fluent-bit
+data:
+  # Configuration files: server, input, filters and output
+  # ======================================================
+  ca.crt: |-
+
+  token:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         1
+        Log_Level     info
+        Daemon        off
+        Parsers_File  parsers.conf
+        HTTP_Server   On
+        HTTP_Listen   0.0.0.0
+        HTTP_Port     2020
+
+    @INCLUDE input-kubernetes.conf
+    @INCLUDE filter-kubernetes.conf
+    @INCLUDE output-kafka.conf
+
+  input-kubernetes.conf: |
+    [INPUT]
+        Name              tail
+        Tag               kube.*
+        Path              /var/log/containers/*.log
+        Parser            docker
+        DB                /var/log/flb_kube.db
+        Mem_Buf_Limit     5MB
+        Skip_Long_Lines   On
+        Refresh_Interval  10
+
+  filter-kubernetes.conf: |-
+    [FILTER]
+        Name                kubernetes
+        Buffer_Size         128k
+        Match               kube.*
+        Kube_URL            https://<kubernetes-endpoints>
+        Kube_CA_File        /etc/fluent-bit-raw/ca.crt
+        Kube_Token_File     /etc/fluent-bit-raw/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Merge_Log_Key       log_processed
+        Keep_Log            Off
+        Annotations         Off
+        Labels              Off
+        K8S-Logging.Parser  Off
+        K8S-Logging.Exclude On
+
+  output-kafka.conf: |
+    [OUTPUT]
+        Name           kafka
+        Match          *
+        Brokers        <bootstrap.kafka:9092>
+        Topics         <ops.kube-logs-fluentbit.stream.json.001>
+        Timestamp_Key  @timestamp
+        Retry_Limit    false
+        # hides errors "Receive failed: Disconnected" when kafka kills idle connections
+        rdkafka.log.connection.close false
+        # producer buffer is not included in http://fluentbit.io/documentation/0.12/configuration/memory_usage.html#estimating
+        rdkafka.queue.buffering.max.kbytes 10240
+        # for logs you'll probably want this ot be 0 or 1, not more
+        rdkafka.request.required.acks 1
+        rdkafka.sasl.username <username>
+        rdkafka.sasl.password <password>
+        rdkafka.sasl.mechanism SCRAM-SHA-256
+        rdkafka.security.protocol SASL_PLAINTEXT
+
+  parsers.conf: |
+    [PARSER]
+        Name   json
+        Format json
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
+        Name        docker
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   On

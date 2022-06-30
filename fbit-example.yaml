@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    eks.tke.cloud.tencent.com/log-collector: fluent-bit
+    eks.tke.cloud.tencent.com/log-collector-configmap: logging/fluent-bit-config
+    eks.tke.cloud.tencent.com/hot-reload-config: "true"
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      ports:
+        - containerPort: 80
