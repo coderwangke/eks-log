@@ -69,7 +69,7 @@ data:
         rdkafka.request.required.acks 1
         rdkafka.sasl.username <username>
         rdkafka.sasl.password <password>
-        rdkafka.sasl.mechanism SCRAM-SHA-256
+        rdkafka.sasl.mechanism PLAIN
         rdkafka.security.protocol SASL_PLAINTEXT
 
   parsers.conf: |
