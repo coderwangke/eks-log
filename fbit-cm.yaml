@@ -72,6 +72,17 @@ data:
         rdkafka.sasl.mechanism PLAIN
         rdkafka.security.protocol SASL_PLAINTEXT
 
+  output-es.conf: |
+    [OUTPUT]
+        Name  es
+        Match *
+        Host  <host>
+        Port  <port>
+        HTTP_User <user>
+        HTTP_Passwd <password>
+        Index my_index
+        Type  doc
+
   parsers.conf: |
     [PARSER]
         Name   json
