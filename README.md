@@ -1,7 +1,6 @@
 # EKS Fluent bit 日志采集
 
 [EKS](https://console.cloud.tencent.com/tke2/cluster?rid=1) 场景下，通过 `Fluent bit` 自定义采集配置来采集容器的标准输出日志。
-
 当前已支持：
 
 1、kafka 投递，支持用户密码认证
@@ -56,7 +55,7 @@ $ kubectl get endpoints kubernetes
 
 ### kafka 相关配置
 
-配置块位置在 `output-kafka.conf`(不需要kafka投递则可直接删除).
+配置块位置在 `output-kafka.conf`(不需要kafka投递则可直接删除)
 
 1、`Brokers` 和 `Topic`: kafka 投递配置
 
@@ -64,7 +63,7 @@ $ kubectl get endpoints kubernetes
 
 ### es 相关配置
 
-配置块位置在 `output-es.conf`(不需要es投递则可直接删除).
+配置块位置在 `output-es.conf`(不需要es投递则可直接删除)
 
 1、`Host` 和 `Port`: es 的 Hostname 和 端口
 
